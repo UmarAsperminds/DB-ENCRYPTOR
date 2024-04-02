@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    
+    <title>Unabridge Encryptor</title>
+
+    <!-- Icons font CSS-->
+    <link href="vendor/mdi-font/css/material-design-iconic-font.min.css" rel="stylesheet" media="all">
+    <link href="vendor/font-awesome-4.7/css/font-awesome.min.css" rel="stylesheet" media="all">
+    <!-- Font special for pages-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,100i,300,300i,400,400i,500,500i,700,700i,900,900i" rel="stylesheet">
+
+    <!-- Vendor CSS-->
+    <link href="vendor/select2/select2.min.css" rel="stylesheet" media="all">
+    <link href="vendor/datepicker/daterangepicker.css" rel="stylesheet" media="all">
+
+    <!-- Main CSS-->
+    <link href="css/main.css" rel="stylesheet" media="all">
+</head>
+
+<body>
+    <div class="page-wrapper bg-blue p-t-100 p-b-100 font-robo">
+        <div class="wrapper wrapper--w680">
+            <div class="card card-1">
+                <div class="card-heading"></div>
+                <div class="card-body">
+                    <h2 class="title">Database Info</h2>
+                        <div class="input-group">
+                            <input class="input--style-1" type="text" placeholder="Host Name / IP address" id="HostName">
+                        </div>
+                        <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group">
+                                    <input class="input--style-1" type="text" placeholder="User Name" id="UserName">
+                                </div>
+                            </div>
+                            <div class="col-2">
+                                <div class="input-group">
+                                    <input class="input--style-1" type="text" placeholder="Password" id="Password">
+                                </div>
+                            </div>                            
+                        </div>
+                        <div>
+                            <button class="btn btn--radius btn--primary" id="TestConnection">Test Connection</button>
+                            <font id="TestMessage"></font>
+                        </div><br>
+                        <div class="input-group" style="display: none;" id="DatabaseDiv">
+                            <div class="rs-select2 js-select-simple select--no-search">
+                                <select name="class" id="Databases">
+                                    <option disabled="disabled" selected="selected">Database List</option>
+                                </select>
+                                <div class="select-dropdown"></div>
+                            </div>
+                        </div>
+                        <!-- <div class="row row-space">
+                            <div class="col-2">
+                                <div class="input-group">
+                                    <input class="input--style-1" type="text" placeholder="REGISTRATION CODE" name="res_code">
+                                </div>
+                            </div>
+                        </div> -->
+                        <div class="p-t-20">
+                            <button class="btn btn--radius btn--encrypt" id="Encrypt"> Encrypt </button>
+                            <button class="btn btn--radius btn--green" id="Decrypt"> Decrypt </button>
+                            <font id="FunctionMessage"></font>
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="vendor/jquery/jquery.min.js"></script>
+
+    <script src="vendor/select2/select2.min.js"></script>
+    <script src="vendor/datepicker/moment.min.js"></script>
+    <script src="vendor/datepicker/daterangepicker.js"></script>
+
+    <script src="js/global.js"></script>
+
+<script type="text/javascript">
+$('#TestConnection').click(function(){
+    $('#Databases').empty().append('<option disabled="disabled" selected="selected">Database List</option>');
+    $('#TestMessage').html('<b style="font-size:15px; color:orange;"> Please Wait..While we validate your credentials! </b>');
+    if($('#HostName').val() == '' && $('#UserName').val() == '')
+        alert('Oops! Please Enter a Valid Credentials!');
+    else{
+        $.ajax({
+            url:'DbCheck.php?DbCheck',
+            type:'POST',
+            data:{ HostName:$('#HostName').val(), UserName:$('#UserName').val(), Password:$('#Password').val() },
+            success: function(data){
+                console.log(data);
+                if(data.trim() == '')
+                    $('#TestMessage').html('<b style="font-size:15px; color:red;"> Oops! Connection Invalid.. </b>');
+                else{
+                    $('#TestMessage').html('<b style="font-size:15px; color:green;"> Super! Connection Valid.. </b>');
+                    $('#Databases').append(data);
+                    $('#DatabaseDiv').show();
+                    $('#UserName, #HostName, #Password').attr('disabled',true);
+                }
+            }
+        });
+    }
+});
+$('#Encrypt, #Decrypt').click(function(){
+    var Action = $(this).attr('id');
+    $.ajax({
+        url:'DbCheck.php?Function=true&ToDo='+Action,
+        type:'POST',
+        data:{ HostName:$('#HostName').val(), UserName:$('#UserName').val(), Password:$('#Password').val(), DbName:$('#Databases :selected').val() },
+        success: function(data){
+            console.log(data);
+            if(data == 'Error')
+                $('#FunctionMessage').html('<b style="font-size:15px; color:red;"> Oops! Something went Wrong..! </b>');
+            else
+                $('#FunctionMessage').html('<b style="font-size:15px; color:green;">'+data.split('&')[1]+'</b>');
+        }
+    });
+});
+</script>
+</body>
+
+</html>
+
